@@ -2,46 +2,713 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Look Tuck — Support</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Look Tuck — Notes &amp; Words on your Lock Screen</title>
+<meta name="description" content="Shopping lists, live countdowns, smart notes and a new language — right on your iPhone Lock Screen and in the Dynamic Island. No accounts, no ads, no tracking.">
+<meta name="theme-color" content="#0B0C0F">
+<meta name="color-scheme" content="dark">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Look Tuck">
+<meta property="og:title" content="Look Tuck — Notes &amp; Words on your Lock Screen">
+<meta property="og:description" content="Shopping lists, countdowns, smart notes — and a new language, every time you look at your phone.">
+<meta property="og:url" content="https://atobroo.github.io/looktuck/">
+<meta property="og:image" content="https://atobroo.github.io/looktuck/assets/hero-cards.jpg">
+<meta property="og:image:width" content="1800">
+<meta property="og:image:height" content="1013">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Look Tuck — Notes &amp; Words on your Lock Screen">
+<meta name="twitter:description" content="Shopping lists, countdowns, smart notes — and a new language, every time you look at your phone.">
+<meta name="twitter:image" content="https://atobroo.github.io/looktuck/assets/hero-cards.jpg">
+
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="apple-touch-icon" href="assets/icon.png">
+
+<script>
+  /* ============================================================
+     НАСТРОЙКИ — вставьте сюда ID приложения и ссылку App Store.
+     Это единственное место, где они задаются.
+     ============================================================ */
+  window.LOOKTUCK_CONFIG = {
+    APP_ID: "6829855650",                                   // например "6741234567"
+    APP_STORE_URL: "https://apps.apple.com/app/id6829855650" // полная ссылка на страницу в App Store
+  };
+  (function () {
+    var id = window.LOOKTUCK_CONFIG.APP_ID;
+    if (id && /^\d+$/.test(id)) {           // баннер Safari появится, только когда указан настоящий ID
+      var m = document.createElement("meta");
+      m.name = "apple-itunes-app";
+      m.content = "app-id=" + id;
+      document.head.appendChild(m);
+    }
+  })();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
-  :root { --text:#0A0A0B; --muted:#6B6B70; --line:#E5E5E8; --bg:#FFFFFF; --accent:#E8341F; }
-  @media (prefers-color-scheme: dark) { :root { --text:#F5F5F7; --muted:#9A9AA0; --line:#2A2A2E; --bg:#000000; } }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--text);
-         font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-         line-height:1.55; -webkit-font-smoothing:antialiased; }
-  main { max-width:680px; margin:0 auto; padding:56px 24px 80px; }
-  .mono { font-family:ui-monospace, "SF Mono", Menlo, monospace; font-size:11px; letter-spacing:.14em;
-          text-transform:uppercase; color:var(--muted); }
-  h1 { font-size:56px; font-weight:200; letter-spacing:-.04em; line-height:1; margin:18px 0 8px; }
-  .rule { border-top:1px solid var(--text); margin:36px 0 20px; }
-  p { margin:0 0 10px; color:var(--muted); font-size:17px; }
-  .btn { display:inline-block; margin-top:14px; background:var(--text); color:var(--bg); text-decoration:none;
-         border-radius:999px; padding:13px 22px; font-size:16px; }
-  a { color:var(--text); }
-  .dot { display:inline-block; width:6px; height:6px; border-radius:3px; background:var(--accent);
-         margin-right:8px; vertical-align:middle; }
+  :root {
+    --bg: #0B0C0F;
+    --bg-2: #111318;
+    --text: #F5F5F7;
+    --muted: #A1A1AA;
+    --faint: #6E6E78;
+    --line: rgba(255,255,255,.10);
+    --glass: rgba(255,255,255,.05);
+    --glass-strong: rgba(255,255,255,.08);
+    --red: #FF3A24;
+    --shop: #0F9761;
+    --event: #2B5CE6;
+    --notes: #D99405;
+    --words: #6B54E0;
+    --gold: #F5C65C;
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --radius: 24px;
+    --maxw: 1120px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 72px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body { min-height: 100vh; line-height: 1.55; overflow-x: hidden; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+  .dot { display: inline-block; width: .32em; height: .32em; border-radius: 50%; background: var(--red);
+         box-shadow: 0 0 14px rgba(255,58,36,.75); vertical-align: baseline; margin-left: .04em; }
+
+  /* ---------- Навигация ---------- */
+  .nav { position: fixed; inset: 0 0 auto 0; z-index: 50;
+         background: rgba(11,12,15,.66); backdrop-filter: blur(20px) saturate(140%);
+         -webkit-backdrop-filter: blur(20px) saturate(140%); border-bottom: 1px solid var(--line); }
+  .nav-inner { max-width: var(--maxw); margin: 0 auto; padding: 10px 20px; display: flex;
+               align-items: center; justify-content: space-between; gap: 12px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+           font-weight: 700; font-size: 18px; letter-spacing: -.02em; white-space: nowrap; }
+  .brand img { width: 30px; height: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.4); }
+  .nav-links { display: flex; align-items: center; gap: 22px; font-size: 14px; font-weight: 500; }
+  .nav-links a { color: var(--muted); text-decoration: none; transition: color .2s var(--ease); }
+  .nav-links a:hover { color: var(--text); }
+  .lang { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--glass-strong);
+          border: 1px solid var(--line); }
+  .lang button { all: unset; cursor: pointer; font-size: 12px; font-weight: 600; letter-spacing: .04em;
+                 padding: 5px 10px; border-radius: 999px; color: var(--muted);
+                 transition: background .25s var(--ease), color .25s var(--ease); }
+  .lang button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+  .lang button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  @media (max-width: 760px) { .nav-links a { display: none; } }
+
+  /* ---------- Hero ---------- */
+  .hero { position: relative; padding: 112px 0 56px; overflow: hidden; }
+  .glow { position: absolute; inset: -160px -120px 0 -120px; pointer-events: none; z-index: 0;
+          filter: blur(70px); opacity: .55; }
+  .blob { position: absolute; border-radius: 50%; will-change: transform; }
+  .b1 { width: 460px; height: 460px; top: -40px; left: 2%;  background: radial-gradient(circle, var(--event) 0%, transparent 68%); animation: float1 22s ease-in-out infinite alternate; }
+  .b2 { width: 420px; height: 420px; top: 0;     right: 4%; background: radial-gradient(circle, var(--notes) 0%, transparent 68%); animation: float2 26s ease-in-out infinite alternate; }
+  .b3 { width: 440px; height: 440px; bottom: -80px; left: 18%; background: radial-gradient(circle, var(--shop) 0%, transparent 68%); animation: float3 24s ease-in-out infinite alternate; }
+  .b4 { width: 480px; height: 480px; bottom: -120px; right: 14%; background: radial-gradient(circle, var(--words) 0%, transparent 68%); animation: float1 28s ease-in-out infinite alternate-reverse; }
+  @keyframes float1 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(60px,40px,0) scale(1.08); } }
+  @keyframes float2 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(-50px,50px,0) scale(1.06); } }
+  @keyframes float3 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(40px,-40px,0) scale(1.1); } }
+
+  .hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: 1.1fr .9fr;
+               align-items: center; gap: 48px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px;
+             border-radius: 999px; background: var(--glass); border: 1px solid var(--line);
+             font-size: 13px; font-weight: 600; color: var(--muted); }
+  .eyebrow img { width: 26px; height: 26px; border-radius: 7px; }
+  .eyebrow b { color: var(--text); font-weight: 700; }
+  h1 { font-size: clamp(40px, 6.4vw, 72px); line-height: 1.02; letter-spacing: -.045em;
+       font-weight: 800; margin: 22px 0 18px; }
+  h1 em { font-style: normal; background: linear-gradient(92deg, #8EA8FF 0%, #B49CFF 45%, #FFC861 100%);
+          -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { font-size: clamp(17px, 2vw, 20px); color: var(--muted); max-width: 540px; }
+  .cta { margin-top: 30px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; }
+  .meta { font-size: 13px; color: var(--faint); }
+
+  /* Кнопка App Store */
+  .store { display: inline-flex; align-items: center; gap: 10px; height: 54px; padding: 0 20px 0 16px;
+           background: #000; color: #fff; text-decoration: none; border-radius: 13px;
+           border: 1px solid rgba(255,255,255,.28); transition: transform .25s var(--ease), border-color .25s var(--ease); }
+  .store:hover { transform: translateY(-1px); border-color: rgba(255,255,255,.55); }
+  .store svg { width: 26px; height: 30px; flex: none; }
+  .store span { display: flex; flex-direction: column; line-height: 1.08; }
+  .store small { font-size: 11px; font-weight: 500; letter-spacing: .01em; }
+  .store strong { font-size: 21px; font-weight: 600; letter-spacing: -.02em; }
+
+  /* Телефон (рамка для raw-скриншотов) */
+  .phone { position: relative; width: 100%; max-width: 300px; margin: 0 auto; aspect-ratio: 640 / 1391;
+           padding: 11px; border-radius: 50px; background: linear-gradient(145deg, #2A2B30, #0D0E11 60%);
+           box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset, 0 0 0 2px #050506,
+                       0 40px 90px rgba(0,0,0,.6), 0 10px 30px rgba(0,0,0,.45); }
+  .phone img { width: 100%; height: 100%; object-fit: cover; border-radius: 40px; background: #000; }
+  .phone::after { content: ""; position: absolute; top: 22px; left: 50%; width: 30%; height: 26px;
+                  transform: translateX(-50%); background: #000; border-radius: 20px; }
+  .hero-visual { position: relative; }
+  .hero-visual .cards { position: absolute; width: 150%; max-width: none; left: -25%; top: 50%;
+                        transform: translateY(-50%); opacity: .35; border-radius: 28px; z-index: -1;
+                        -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 70%);
+                        mask-image: radial-gradient(ellipse at center, #000 30%, transparent 70%); }
+  .parallax { will-change: transform; }
+
+  /* ---------- Секции ---------- */
+  section { position: relative; padding: 72px 0; }
+  .kicker { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+  h2 { font-size: clamp(30px, 4.4vw, 48px); line-height: 1.08; letter-spacing: -.035em; font-weight: 800; margin: 10px 0 14px; }
+  .sub { color: var(--muted); font-size: 18px; max-width: 620px; }
+
+  /* Четыре карточки */
+  .cards4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 36px; }
+  .card { position: relative; border-radius: var(--radius); padding: 22px 20px 24px; min-height: 196px;
+          color: #fff; overflow: hidden; border: 1px solid rgba(255,255,255,.18);
+          box-shadow: 0 18px 40px rgba(0,0,0,.35); transition: transform .35s var(--ease); }
+  .card:hover { transform: translateY(-3px); }
+  .card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(255,255,255,.18), rgba(255,255,255,0) 55%); pointer-events: none; }
+  .card .ico { width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center;
+               background: rgba(255,255,255,.2); font-size: 24px; }
+  .card h3 { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin: 18px 0 6px; }
+  .card p { font-size: 15px; color: rgba(255,255,255,.88); line-height: 1.45; }
+  .card .pro { position: absolute; top: 18px; right: 18px; font-size: 11px; font-weight: 700; letter-spacing: .06em;
+               padding: 4px 9px; border-radius: 999px; background: rgba(0,0,0,.22); border: 1px solid rgba(255,255,255,.4); }
+  .c-shop { background: var(--shop); } .c-event { background: var(--event); }
+  .c-notes { background: var(--notes); } .c-words { background: var(--words); }
+
+  /* Блоки «текст + телефон» */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .split.rev .split-text { order: 2; }
+  .features { list-style: none; margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .features li { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-radius: 16px;
+                 background: var(--glass); border: 1px solid var(--line); font-weight: 600; font-size: 15px; }
+  .features li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--words);
+                         box-shadow: 0 0 10px var(--words); flex: none; }
+  .words-bg { position: absolute; inset: 0; pointer-events: none;
+              background: radial-gradient(600px 400px at 75% 50%, rgba(107,84,224,.28), transparent 70%); }
+
+  /* Живая демо-карточка «Слова» */
+  .demo { margin-top: 26px; max-width: 420px; border-radius: 22px; padding: 16px 18px; cursor: pointer;
+          background: rgba(10,10,14,.75); border: 1px solid var(--line); box-shadow: 0 20px 50px rgba(0,0,0,.45);
+          display: grid; grid-template-columns: 34px 1fr auto; gap: 4px 12px; align-items: center;
+          -webkit-tap-highlight-color: transparent; user-select: none; transition: border-color .3s var(--ease); }
+  .demo:hover, .demo:focus-visible { border-color: rgba(107,84,224,.6); outline: none; }
+  .demo .bk { grid-row: span 2; width: 34px; height: 34px; border-radius: 50%; background: var(--words);
+              display: grid; place-items: center; font-size: 16px; }
+  .demo .top { font: 600 12px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .08em; color: #A898FF; }
+  .demo .next { font-size: 14px; font-weight: 600; color: #A898FF; justify-self: end; }
+  .demo .word { font-size: 22px; font-weight: 700; letter-spacing: -.01em; grid-column: 2; }
+  .demo .tr { color: #B9AEFF; font-weight: 600; opacity: 0; transition: opacity .35s var(--ease); }
+  .demo.open .tr { opacity: 1; }
+  .demo .chk { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 14px;
+               background: rgba(255,255,255,.08); color: var(--muted); transition: background .3s var(--ease), color .3s var(--ease); }
+  .demo.open .chk { background: var(--words); color: #fff; }
+  .hint { margin-top: 10px; font-size: 13px; color: var(--faint); }
+
+  /* Умные заметки */
+  .ticket { width: 100%; max-width: 460px; margin: 0 auto; border-radius: 28px;
+            box-shadow: 0 30px 70px rgba(0,0,0,.55), 0 0 80px rgba(217,148,5,.18); border: 1px solid var(--line); }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .chip { padding: 9px 14px; border-radius: 999px; font-size: 15px; font-weight: 600;
+          background: rgba(217,148,5,.12); border: 1px solid rgba(217,148,5,.35); color: #FFD27A; }
+  .notes-bg { position: absolute; inset: 0; pointer-events: none;
+              background: radial-gradient(600px 400px at 25% 50%, rgba(217,148,5,.20), transparent 70%); }
+
+  /* Скриншоты */
+  .shots { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 8px 20px 18px;
+           margin: 30px auto 0; max-width: var(--maxw); scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+  .shots img { flex: none; width: 240px; aspect-ratio: 640 / 1391; height: auto; border-radius: 26px;
+               scroll-snap-align: center; background: var(--bg-2); border: 1px solid var(--line); }
+  @media (min-width: 1000px) { .shots img { width: 252px; } }
+
+  /* Pro */
+  .pro-card { position: relative; margin: 36px auto 0; max-width: 560px; padding: 34px 30px; border-radius: 30px;
+              background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+              border: 1px solid var(--line); overflow: hidden; text-align: center; }
+  .pro-card::before { content: ""; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+                      background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+  .pro-badge { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; font-weight: 700; letter-spacing: .06em;
+               color: var(--gold); padding: 5px 12px; border-radius: 999px; border: 1px solid rgba(245,198,92,.7); }
+  .pro-card h3 { font-size: clamp(28px, 4vw, 38px); letter-spacing: -.03em; font-weight: 800; margin: 16px 0 6px; }
+  .price { font-size: 19px; color: var(--muted); }
+  .price b { color: var(--text); font-size: 26px; letter-spacing: -.02em; }
+  .pro-list { list-style: none; margin: 26px auto 4px; display: grid; gap: 10px; max-width: 360px; text-align: left; }
+  .pro-list li { display: flex; gap: 12px; align-items: center; font-weight: 600; }
+  .pro-list li::before { content: "✓"; width: 24px; height: 24px; border-radius: 50%; flex: none; display: grid; place-items: center;
+                         font-size: 13px; color: #1A1206; background: var(--gold); }
+  .free { text-align: center; color: var(--muted); margin-top: 18px; font-size: 15px; }
+
+  /* Приватность */
+  .privacy { display: flex; gap: 22px; align-items: center; padding: 28px; border-radius: 26px;
+             background: var(--glass); border: 1px solid var(--line); }
+  .privacy .lock { width: 60px; height: 60px; border-radius: 18px; flex: none; display: grid; place-items: center;
+                   background: rgba(15,151,97,.16); border: 1px solid rgba(15,151,97,.45); font-size: 28px; }
+  .privacy h2 { font-size: clamp(24px, 3vw, 32px); margin: 0 0 6px; }
+  .privacy p { color: var(--muted); }
+  .link { color: var(--text); font-weight: 600; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.3);
+          transition: border-color .2s var(--ease); }
+  .link:hover { border-color: var(--red); }
+
+  /* Подвал */
+  footer { padding: 64px 0 48px; border-top: 1px solid var(--line); margin-top: 24px; }
+  .foot { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
+  .mail { display: inline-flex; align-items: center; gap: 10px; margin-top: 16px; padding: 13px 20px; border-radius: 999px;
+          background: var(--text); color: var(--bg); text-decoration: none; font-weight: 600; word-break: break-all; }
+  .foot-links { list-style: none; display: grid; gap: 10px; align-content: start; }
+  .foot-links a { color: var(--muted); text-decoration: none; transition: color .2s var(--ease); }
+  .foot-links a:hover { color: var(--text); }
+  .copy { margin-top: 40px; font-size: 13px; color: var(--faint); display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; }
+
+  /* Плавное появление (без пружин) */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ---------- Адаптив ---------- */
+  @media (max-width: 960px) {
+    .cards4 { grid-template-columns: repeat(2, 1fr); }
+    .hero-grid, .split { grid-template-columns: 1fr; gap: 40px; }
+    .split.rev .split-text { order: 0; }
+    .hero { padding-top: 96px; }
+    .hero-text { text-align: left; }
+  }
+  @media (max-width: 560px) {
+    section { padding: 56px 0; }
+    .cards4 { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card { min-height: 0; padding: 18px 16px 20px; }
+    .card h3 { font-size: 19px; margin-top: 14px; }
+    .card p { font-size: 14px; }
+    .card .pro { top: 14px; right: 14px; }
+    .features { grid-template-columns: 1fr 1fr; }
+    .features li { padding: 12px; font-size: 14px; }
+    .phone { max-width: 260px; }
+    .shots img { width: 210px; }
+    .privacy { flex-direction: column; align-items: flex-start; }
+    .foot { grid-template-columns: 1fr; }
+    .pro-card { padding: 28px 20px; }
+  }
+  @media (max-width: 380px) {
+    .cards4 { grid-template-columns: 1fr; }
+    .brand span.name { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .blob { animation: none; }
+    .reveal { opacity: 1; transform: none; transition: none; }
+    .card, .store, .demo .tr, .demo .chk { transition: none; }
+    .card:hover, .store:hover { transform: none; }
+  }
 </style>
 </head>
 <body>
-<main>
-  <div class="mono"><span class="dot"></span>Look Tuck</div>
-  <h1>Support</h1>
-  <p>Quick notes on your Lock Screen and in the Dynamic Island: shopping lists, events with a countdown, smart notes and Words — learn a language every time you look at your phone.</p>
-  <div class="rule"></div>
-  <div class="mono">Contact · Связь · Байланыс</div>
-  <p>Ideas, questions and bug reports — we read every email.<br>
-     Идеи, вопросы и сообщения об ошибках.<br>
-     Идеялар, сұрақтар және қателер туралы хабарлар.</p>
-  <a class="btn" href="mailto:looktuck.support@icloud.com?subject=Look%20Tuck">looktuck.support@icloud.com</a>
-  <div class="rule"></div>
-  <div class="mono">Privacy</div>
-  <p>Look Tuck collects no data. <a href="privacy.html">Privacy Policy · Политика конфиденциальности · Құпиялылық саясаты</a></p>
-  <p><a href="copyright.html">Copyright &amp; Terms · Авторские права · Авторлық құқық</a></p>
-  <div class="rule"></div>
-  <div class="mono">Developer</div>
-  <p>Aidos Mr. · atobroo</p>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" aria-label="Look Tuck">
+      <img src="assets/icon.png" alt="" width="30" height="30">
+      <span class="name">Look Tuck<span class="dot"></span></span>
+    </a>
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#cards" data-t="navCards">Cards</a>
+      <a href="#words" data-t="navWords">Words</a>
+      <a href="#pro" data-t="navPro">Pro</a>
+      <a href="#support" data-t="navSupport">Support</a>
+    </nav>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      <button type="button" data-lang="ru" aria-pressed="false">RU</button>
+      <button type="button" data-lang="kk" aria-pressed="false">KZ</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <!-- 1. Hero -->
+  <div class="hero">
+    <div class="glow" aria-hidden="true">
+      <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+    </div>
+    <div class="wrap hero-grid">
+      <div class="hero-text reveal">
+        <div class="eyebrow"><img src="assets/icon.png" alt="" width="26" height="26"><b>Look Tuck<span class="dot"></span></b> <span data-t="eyebrow">for iPhone</span></div>
+        <h1 data-t-html="heroTitle">Notes and words <em>on your Lock Screen</em></h1>
+        <p class="lead" data-t="heroSub">Shopping lists, countdowns, smart notes — and a new language, every time you look at your phone.</p>
+        <div class="cta">
+          <a class="store" href="#" data-store aria-label="Download on the App Store">
+            <svg viewBox="0 0 384 512" aria-hidden="true"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+            <span><small data-t="storeSmall">Download on the</small><strong>App Store</strong></span>
+          </a>
+          <span class="meta" data-t="heroMeta">Free · 17 languages · iOS</span>
+        </div>
+      </div>
+      <div class="hero-visual reveal">
+        <img class="cards parallax" data-speed="0.06" src="assets/hero-cards.jpg" alt="" aria-hidden="true">
+        <div class="phone parallax" data-speed="-0.04">
+          <img src="assets/raw-lock-all.jpg" alt="iPhone Lock Screen with Look Tuck: an event countdown, a shopping list and a word card" data-t-alt="altLockAll" width="640" height="1391">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Четыре карточки -->
+  <section id="cards">
+    <div class="wrap">
+      <div class="reveal">
+        <div class="kicker" data-t="cardsKicker">Four cards</div>
+        <h2 data-t="cardsTitle">Everything you need, without unlocking</h2>
+      </div>
+      <div class="cards4">
+        <article class="card c-shop reveal"><div class="ico" aria-hidden="true">🛒</div><h3 data-t="shopName">Shopping</h3><p data-t="shopDesc">Tick items off without unlocking</p></article>
+        <article class="card c-event reveal"><div class="ico" aria-hidden="true">📅</div><h3 data-t="eventName">Event</h3><p data-t="eventDesc">“Work in 30 min” becomes a live countdown</p></article>
+        <article class="card c-notes reveal"><div class="ico" aria-hidden="true">📝</div><h3 data-t="notesName">Notes</h3><p data-t="notesDesc">Type a flight — get a ticket</p></article>
+        <article class="card c-words reveal"><span class="pro">PRO</span><div class="ico" aria-hidden="true">🌍</div><h3 data-t="wordsName">Words</h3><p data-t="wordsDesc">Learn a language at every glance</p></article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Слова -->
+  <section id="words">
+    <div class="words-bg" aria-hidden="true"></div>
+    <div class="wrap split">
+      <div class="split-text reveal">
+        <div class="kicker" data-t="wordsKicker">Look Tuck Pro</div>
+        <h2 data-t="wordsTitle">Words on your Lock Screen</h2>
+        <p class="sub" data-t="wordsSub">See a word, recall the translation, tap ✓. Spaced repetition brings back the ones you forget.</p>
+        <ul class="features">
+          <li data-t="wf1">11 languages</li>
+          <li data-t="wf2">Ready-made decks</li>
+          <li data-t="wf3">Pronunciation</li>
+          <li data-t="wf4">Daily streak 🔥</li>
+        </ul>
+        <div class="demo" id="demo" role="button" tabindex="0" aria-live="polite">
+          <div class="bk" aria-hidden="true">📖</div>
+          <div class="top" id="demoPair">EN → ES 🔥 3</div>
+          <div class="next" data-t="demoNext">Next →</div>
+          <div class="word"><span id="demoWord">apple</span> <span class="tr" id="demoTr">— manzana</span></div>
+          <div class="chk" aria-hidden="true">✓</div>
+        </div>
+        <p class="hint" data-t="demoHint">Tap the card to reveal the translation</p>
+      </div>
+      <div class="reveal">
+        <div class="phone">
+          <img loading="lazy" src="assets/raw-lock-words.jpg" alt="iPhone Lock Screen with Look Tuck word cards" data-t-alt="altWords" width="640" height="1391">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Умные заметки -->
+  <section id="notes">
+    <div class="notes-bg" aria-hidden="true"></div>
+    <div class="wrap split rev">
+      <div class="split-text reveal">
+        <div class="kicker" data-t="notesKicker">Smart notes</div>
+        <h2 data-t="notesTitle">Smart notes</h2>
+        <p class="sub" data-t="notesSub">Type “Flight KC 927 gate A14” and get a real boarding ticket with a countdown.</p>
+        <div class="chips">
+          <span class="chip" data-t="ch1">✈️ Flight</span>
+          <span class="chip" data-t="ch2">🅿️ Parking</span>
+          <span class="chip" data-t="ch3">🎫 Ticket</span>
+          <span class="chip" data-t="ch4">🚕 Taxi</span>
+          <span class="chip" data-t="ch5">🏠 Address</span>
+          <span class="chip" data-t="ch6">⏱ Timer</span>
+          <span class="chip" data-t="ch7">📦 Parcel</span>
+          <span class="chip" data-t="ch8">🧥 Cloakroom</span>
+        </div>
+      </div>
+      <div class="reveal">
+        <img class="ticket" loading="lazy" src="assets/raw-ticket.jpg" alt="Boarding ticket KC 927 from Almaty to Dubai with gate, seat and boarding countdown" data-t-alt="altTicket" width="800" height="596">
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Скриншоты -->
+  <section id="shots">
+    <div class="wrap reveal">
+      <div class="kicker" data-t="shotsKicker">Screenshots</div>
+      <h2 data-t="shotsTitle">See it in action</h2>
+    </div>
+    <div class="shots" id="shots-strip" tabindex="0" aria-label="Screenshots"></div>
+  </section>
+
+  <!-- 6. Pro -->
+  <section id="pro">
+    <div class="wrap">
+      <div class="pro-card reveal">
+        <span class="pro-badge">✦ PRO</span>
+        <h3>Look Tuck Pro</h3>
+        <p data-t="proTag" style="font-size:20px;font-weight:700;margin-bottom:6px">One purchase. Forever.</p>
+        <p class="price"><b>2 990 ₸</b> · <span data-t="proPrice">no subscription</span></p>
+        <ul class="pro-list">
+          <li data-t="p1">Words</li>
+          <li data-t="p2">Smart notes</li>
+          <li data-t="p3">Camera scan</li>
+          <li data-t="p4">All future Pro features</li>
+        </ul>
+      </div>
+      <p class="free reveal" data-t="proFree">Shopping, Events and Notes stay free forever.</p>
+    </div>
+  </section>
+
+  <!-- 7. Приватность -->
+  <section id="privacy">
+    <div class="wrap">
+      <div class="privacy reveal">
+        <div class="lock" aria-hidden="true">🔒</div>
+        <div>
+          <h2 data-t="privTitle">Private by design</h2>
+          <p data-t="privText">No accounts, ads or analytics. Everything stays on your iPhone.</p>
+          <p style="margin-top:10px"><a class="link" href="privacy.html" data-t="privLink">Privacy Policy</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
+
+<!-- 8. Поддержка / подвал -->
+<footer id="support">
+  <div class="wrap">
+    <div class="foot">
+      <div class="reveal">
+        <div class="kicker" data-t="supKicker">Support</div>
+        <h2 style="font-size:clamp(26px,3.4vw,36px)" data-t="supText">Questions or ideas? We read every email.</h2>
+        <a class="mail" href="mailto:looktuck.support@icloud.com?subject=Look%20Tuck">✉️ looktuck.support@icloud.com</a>
+      </div>
+      <ul class="foot-links reveal">
+        <li><a href="privacy.html" data-t="fPrivacy">Privacy Policy</a></li>
+        <li><a href="copyright.html" data-t="fTerms">Copyright &amp; Terms</a></li>
+        <li><a href="https://instagram.com/atobroo" target="_blank" rel="noopener">Instagram · @atobroo</a></li>
+        <li><a href="https://atobroo.github.io/litm/" target="_blank" rel="noopener"><span data-t="fOther">Other apps by the author:</span> Litm</a></li>
+      </ul>
+    </div>
+    <div class="copy">
+      <span>© 2026 Aidos Mr. (atobroo)</span>
+      <span>Look Tuck<span class="dot"></span></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  var CONFIG = window.LOOKTUCK_CONFIG;
+
+  /* ---------- Все тексты ---------- */
+  var T = {
+    en: {
+      docTitle: "Look Tuck — Notes & Words on your Lock Screen",
+      navCards: "Cards", navWords: "Words", navPro: "Pro", navSupport: "Support",
+      eyebrow: "for iPhone",
+      heroTitle: "Notes and words <em>on your Lock Screen</em>",
+      heroSub: "Shopping lists, countdowns, smart notes — and a new language, every time you look at your phone.",
+      storeSmall: "Download on the", storeAria: "Download on the App Store",
+      heroMeta: "17 languages · no ads · no accounts",
+      altLockAll: "iPhone Lock Screen with Look Tuck: an event countdown, a shopping list and a word card",
+      cardsKicker: "Four cards", cardsTitle: "Everything you need, without unlocking",
+      shopName: "Shopping", shopDesc: "Tick items off without unlocking",
+      eventName: "Event", eventDesc: "“Work in 30 min” becomes a live countdown",
+      notesName: "Notes", notesDesc: "Type a flight — get a ticket",
+      wordsName: "Words", wordsDesc: "Learn a language at every glance",
+      wordsKicker: "Look Tuck Pro", wordsTitle: "Words on your Lock Screen",
+      wordsSub: "See a word, recall the translation, tap ✓. Spaced repetition brings back the ones you forget.",
+      wf1: "11 languages", wf2: "Ready-made decks", wf3: "Pronunciation", wf4: "Daily streak 🔥",
+      demoNext: "Next →", demoHint: "Tap the card to reveal the translation",
+      altWords: "iPhone Lock Screen with Look Tuck word cards",
+      notesKicker: "Notes", notesTitle: "Smart notes",
+      notesSub: "Type “Flight KC 927 gate A14” and get a real boarding ticket with a countdown.",
+      ch1: "✈️ Flight", ch2: "🅿️ Parking", ch3: "🎫 Ticket", ch4: "🚕 Taxi", ch5: "🏠 Address", ch6: "⏱ Timer", ch7: "📦 Parcel", ch8: "🧥 Cloakroom",
+      altTicket: "Boarding ticket KC 927 from Almaty to Dubai with gate, seat and boarding countdown",
+      shotsKicker: "Screenshots", shotsTitle: "See it in action", shotAlt: "Look Tuck App Store screenshot",
+      proTag: "One purchase. Forever.", proPrice: "no subscription",
+      p1: "Words", p2: "Smart notes", p3: "Camera scan", p4: "All future Pro features",
+      proFree: "Shopping, Events and Notes stay free forever.",
+      privTitle: "Private by design", privText: "No accounts, ads or analytics. Everything stays on your iPhone.", privLink: "Privacy Policy",
+      supKicker: "Support", supText: "Questions or ideas? We read every email.",
+      fPrivacy: "Privacy Policy", fTerms: "Copyright & Terms", fOther: "Other apps by the author:"
+    },
+    ru: {
+      docTitle: "Look Tuck — заметки и слова на экране блокировки",
+      navCards: "Карточки", navWords: "Слова", navPro: "Pro", navSupport: "Поддержка",
+      eyebrow: "для iPhone",
+      heroTitle: "Заметки и слова <em>на экране блокировки</em>",
+      heroSub: "Списки покупок, отсчёты, умные заметки — и новый язык каждый раз, когда смотрите на телефон.",
+      storeSmall: "Загрузить в", storeAria: "Загрузить в App Store",
+      heroMeta: "17 языков · без рекламы · без аккаунтов",
+      altLockAll: "Экран блокировки iPhone с Look Tuck: отсчёт до события, список покупок и карточка слова",
+      cardsKicker: "Четыре карточки", cardsTitle: "Всё нужное — без разблокировки",
+      shopName: "Покупки", shopDesc: "Отмечайте покупки, не разблокируя телефон",
+      eventName: "Событие", eventDesc: "„На работу через 30 мин“ — живой отсчёт",
+      notesName: "Заметки", notesDesc: "Написали рейс — получили билет",
+      wordsName: "Слова", wordsDesc: "Учите язык при каждом взгляде",
+      wordsKicker: "Look Tuck Pro", wordsTitle: "Слова на экране блокировки",
+      wordsSub: "Видите слово, вспоминаете перевод, нажимаете ✓. Повторения возвращают то, что забылось.",
+      wf1: "11 языков", wf2: "Готовые наборы", wf3: "Произношение", wf4: "Серия дней 🔥",
+      demoNext: "Далее →", demoHint: "Нажмите на карточку, чтобы увидеть перевод",
+      altWords: "Экран блокировки iPhone с карточками слов Look Tuck",
+      notesKicker: "Заметки", notesTitle: "Умные заметки",
+      notesSub: "Напишите „Рейс KC 927 гейт A14“ — и получите настоящий билет с отсчётом до посадки.",
+      ch1: "✈️ Рейс", ch2: "🅿️ Парковка", ch3: "🎫 Талон", ch4: "🚕 Такси", ch5: "🏠 Адрес", ch6: "⏱ Таймер", ch7: "📦 Посылка", ch8: "🧥 Гардероб",
+      altTicket: "Посадочный билет KC 927 из Алматы в Дубай с гейтом, местом и отсчётом до посадки",
+      shotsKicker: "Скриншоты", shotsTitle: "Как это выглядит", shotAlt: "Скриншот Look Tuck из App Store",
+      proTag: "Одна покупка. Навсегда.", proPrice: "без подписки",
+      p1: "Слова", p2: "Умные заметки", p3: "Скан камерой", p4: "Все будущие Pro-функции",
+      proFree: "Покупки, События и Заметки — бесплатно навсегда.",
+      privTitle: "Приватно", privText: "Без аккаунтов, рекламы и аналитики. Всё хранится только на вашем iPhone.", privLink: "Политика конфиденциальности",
+      supKicker: "Поддержка", supText: "Вопросы или идеи? Читаем каждое письмо.",
+      fPrivacy: "Политика конфиденциальности", fTerms: "Авторские права и условия", fOther: "Другие приложения автора:"
+    },
+    kk: {
+      docTitle: "Look Tuck — құлыптау экранындағы жазбалар мен сөздер",
+      navCards: "Карточкалар", navWords: "Сөздер", navPro: "Pro", navSupport: "Қолдау",
+      eyebrow: "iPhone үшін",
+      heroTitle: "Жазбалар мен сөздер <em>құлыптау экранында</em>",
+      heroSub: "Сатып алу тізімі, кері санақ, ақылды жазбалар — және телефонға қараған сайын жаңа тіл.",
+      storeSmall: "Жүктеп алу", storeAria: "App Store-дан жүктеу",
+      heroMeta: "17 тіл · жарнамасыз · аккаунтсыз",
+      altLockAll: "Look Tuck бар iPhone құлыптау экраны: оқиғаға кері санақ, сатып алу тізімі және сөз карточкасы",
+      cardsKicker: "Төрт карточка", cardsTitle: "Керегінің бәрі — телефонды ашпай-ақ",
+      shopName: "Сатып алулар", shopDesc: "Телефонды ашпай-ақ белгілеңіз",
+      eventName: "Оқиға", eventDesc: "„30 минуттан кейін жұмысқа“ — тірі кері санақ",
+      notesName: "Жазбалар", notesDesc: "Рейсті жаздыңыз — билет дайын",
+      wordsName: "Сөздер", wordsDesc: "Әр қарағанда тіл үйреніңіз",
+      wordsKicker: "Look Tuck Pro", wordsTitle: "Сөздер құлыптау экранында",
+      wordsSub: "Сөзді көресіз, аудармасын еске түсіресіз, ✓ басасыз. Қайталау ұмытылғанды қайтарады.",
+      wf1: "11 тіл", wf2: "Дайын жинақтар", wf3: "Айтылым", wf4: "Күндер сериясы 🔥",
+      demoNext: "Келесі →", demoHint: "Аударманы көру үшін карточканы басыңыз",
+      altWords: "Look Tuck сөз карточкалары бар iPhone құлыптау экраны",
+      notesKicker: "Жазбалар", notesTitle: "Ақылды жазбалар",
+      notesSub: "„Рейс KC 927 гейт A14“ деп жазыңыз — отырғызуға дейін кері санағы бар нағыз билет шығады.",
+      ch1: "✈️ Рейс", ch2: "🅿️ Тұрақ", ch3: "🎫 Талон", ch4: "🚕 Такси", ch5: "🏠 Мекенжай", ch6: "⏱ Таймер", ch7: "📦 Сәлемдеме", ch8: "🧥 Гардероб",
+      altTicket: "Алматыдан Дубайға KC 927 отырғызу билеті: гейт, орын және кері санақ",
+      shotsKicker: "Скриншоттар", shotsTitle: "Қалай көрінеді", shotAlt: "App Store-дағы Look Tuck скриншоты",
+      proTag: "Бір рет сатып алу. Мәңгілікке.", proPrice: "жазылымсыз",
+      p1: "Сөздер", p2: "Ақылды жазбалар", p3: "Камерамен сканерлеу", p4: "Болашақ Pro мүмкіндіктері",
+      proFree: "Сатып алулар, Оқиғалар және Жазбалар — мәңгі тегін.",
+      privTitle: "Құпия", privText: "Аккаунт, жарнама және аналитика жоқ. Бәрі тек iPhone-ыңызда сақталады.", privLink: "Құпиялылық саясаты",
+      supKicker: "Қолдау", supText: "Сұрақ не идея бар ма? Әр хатты оқимыз.",
+      fPrivacy: "Құпиялылық саясаты", fTerms: "Авторлық құқық және шарттар", fOther: "Автордың басқа қосымшалары:"
+    }
+  };
+
+  /* Пары для демо-карточки «Слова» */
+  var DEMO = [
+    { pair: "EN → ES", word: "apple", tr: "manzana" },
+    { pair: "EN → ZH", word: "friend", tr: "朋友" },
+    { pair: "EN → FR", word: "travel", tr: "voyage" }
+  ];
+
+  /* ---------- Ссылки App Store ---------- */
+  document.querySelectorAll("[data-store]").forEach(function (a) {
+    a.href = CONFIG.APP_STORE_URL;
+    a.target = "_blank";
+    a.rel = "noopener";
+  });
+
+  /* ---------- Язык ---------- */
+  function store(key, value) {
+    try { if (value === undefined) return localStorage.getItem(key); localStorage.setItem(key, value); }
+    catch (e) { return null; }
+  }
+  function detect() {
+    var saved = store("lt-lang");
+    if (saved && T[saved]) return saved;
+    var nav = ((navigator.languages && navigator.languages[0]) || navigator.language || "en").toLowerCase();
+    if (nav.indexOf("ru") === 0) return "ru";
+    if (nav.indexOf("kk") === 0) return "kk";
+    return "en";
+  }
+  var strip = document.getElementById("shots-strip");
+  function renderShots(lang) {
+    var prefix = lang === "en" ? "en" : "ru"; // для KK — русские скриншоты
+    var html = "";
+    for (var i = 1; i <= 6; i++) {
+      html += '<img loading="lazy" decoding="async" width="640" height="1391" src="assets/shot-' + prefix + "-" + i +
+              '.jpg" alt="' + T[lang].shotAlt + " " + i + '">';
+    }
+    strip.innerHTML = html;
+    strip.scrollLeft = 0;
+  }
+  function apply(lang) {
+    var t = T[lang];
+    document.documentElement.lang = lang;
+    document.title = t.docTitle;
+    document.querySelectorAll("[data-t]").forEach(function (el) {
+      var v = t[el.getAttribute("data-t")]; if (v != null) el.textContent = v;
+    });
+    document.querySelectorAll("[data-t-html]").forEach(function (el) {
+      var v = t[el.getAttribute("data-t-html")]; if (v != null) el.innerHTML = v;
+    });
+    document.querySelectorAll("[data-t-alt]").forEach(function (el) {
+      var v = t[el.getAttribute("data-t-alt")]; if (v != null) el.alt = v;
+    });
+    document.querySelectorAll("[data-store]").forEach(function (a) { a.setAttribute("aria-label", t.storeAria); });
+    document.querySelectorAll(".lang button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === lang));
+    });
+    renderShots(lang);
+  }
+  document.querySelectorAll(".lang button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var lang = b.getAttribute("data-lang");
+      store("lt-lang", lang);
+      apply(lang);
+    });
+  });
+  apply(detect());
+
+  /* ---------- Демо «Слова»: слово → перевод → следующее ---------- */
+  var demo = document.getElementById("demo"), idx = 0;
+  function showDemo() {
+    var d = DEMO[idx];
+    document.getElementById("demoPair").textContent = d.pair + " 🔥 " + (3 + idx);
+    document.getElementById("demoWord").textContent = d.word;
+    document.getElementById("demoTr").textContent = "— " + d.tr;
+  }
+  function tapDemo() {
+    if (!demo.classList.contains("open")) { demo.classList.add("open"); return; }
+    demo.classList.remove("open");
+    setTimeout(function () { idx = (idx + 1) % DEMO.length; showDemo(); }, reduce ? 0 : 200);
+  }
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  demo.addEventListener("click", tapDemo);
+  demo.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); tapDemo(); }
+  });
+  showDemo();
+
+  /* ---------- Плавное появление ---------- */
+  var items = document.querySelectorAll(".reveal");
+  if (reduce || !("IntersectionObserver" in window)) {
+    items.forEach(function (el) { el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { rootMargin: "0px 0px -40px 0px", threshold: 0 });
+    items.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---------- Лёгкий параллакс в шапке ---------- */
+  if (!reduce) {
+    var layers = document.querySelectorAll(".parallax"), ticking = false;
+    function onScroll() {
+      var y = Math.min(window.scrollY, 900);
+      layers.forEach(function (el) {
+        var s = parseFloat(el.getAttribute("data-speed")) || 0;
+        var base = el.classList.contains("cards") ? "translateY(-50%) " : "";
+        el.style.transform = base + "translate3d(0," + (y * s).toFixed(1) + "px,0)";
+      });
+      ticking = false;
+    }
+    window.addEventListener("scroll", function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+    }, { passive: true });
+  }
+})();
+</script>
 </body>
 </html>
